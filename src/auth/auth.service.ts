@@ -102,7 +102,7 @@ export class AuthService {
 
     return {
       message: 'Login successful',
-      token: await this.generateToken(user._id),
+      token: await this.generateToken(user._id, user.role),
     };
   }
 
@@ -193,8 +193,8 @@ export class AuthService {
     return await this.userModel.findOne({ username }).exec();
   }
 
-  async generateToken(userId) {
-    const payload = { userId };
+  async generateToken(userId, role?) {
+    const payload = { userId, role };
     const accessToken = this.jwtService.sign(payload, { expiresIn: '1d' });
     const refreshToken = uuidv4();
     await this.storeRefreshToken(userId, refreshToken);
