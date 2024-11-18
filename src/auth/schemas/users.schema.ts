@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { USER_ROLES } from 'constants/index';
-import { Document } from 'mongoose';
+import { Document, mongo } from 'mongoose';
 
 export type UserDocument = User & Document;
 
@@ -20,6 +20,9 @@ export class User {
 
   @Prop({ required: false, default: false })
   twoFactorAuth: boolean;
+
+  @Prop({ required: false })
+  twoFactorAuthSecret: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

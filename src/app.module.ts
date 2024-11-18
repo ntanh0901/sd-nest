@@ -5,17 +5,21 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { AuthModule } from './auth/auth.module';
 import { JwtModule } from '@nestjs/jwt';
 import { AppController } from './app.controller';
+import { PaymentModule } from './payment/payment.module';
+import { PassportModule } from '@nestjs/passport';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     MongooseModule.forRoot(process.env.MONGO_URI),
+    PassportModule,
     JwtModule.register({
       global: true,
       secret: process.env.JWT_TOKEN_SECRET,
     }),
     ProductsModule,
     AuthModule,
+    PaymentModule,
   ],
   controllers: [AppController],
   providers: [],
