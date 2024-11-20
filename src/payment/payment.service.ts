@@ -1,10 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { CreatePaymentDto } from './dto/create-payment.dto';
 import { UpdatePaymentDto } from './dto/update-payment.dto';
 import { Payment, PaymentDocument } from './payment.schema';
-import { PaymentModule } from './payment.module';
 import { ProductsService } from 'src/products/products.service';
 
 @Injectable()
@@ -49,13 +48,16 @@ export class PaymentService {
     const payments = await this.paymentModel
       .find({
         createdAt: {
-          $gte: new Date(new Date().getFullYear(), month, 1),
-          $lt: new Date(new Date().getFullYear(), month + 1, 1),
+          $gte: new Date(new Date().getFullYear(), month - 1, 1),
+          $lt: new Date(new Date().getFullYear(), month, 1),
         },
       })
       .exec();
 
-    return payments.reduce((acc, payment) => acc + payment.totalPrice, 0);
+    return {
+      revenue: payments.reduce((acc, payment) => acc + payment.totalPrice, 0),
+      payments,
+    };
   }
 
   async update(paymentId: string, updatePaymentDto: UpdatePaymentDto) {

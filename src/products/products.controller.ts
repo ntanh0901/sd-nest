@@ -35,14 +35,14 @@ export class ProductsController {
     return this.productsService.findAllProducts();
   }
 
-  @Get('list-skus')
-  listSkus(@Body() body) {
-    return this.productsService.findAllSkusOfProduct(body.spu);
+  @Get('list-skus/:spu')
+  listSkus(@Param('spu') spu: string) {
+    return this.productsService.findAllSkusOfProduct(spu);
   }
 
-  @Get('search')
-  searchProduct(@Body() body) {
-    return this.productsService.searchProductsByName(body.name);
+  @Get('search/:name')
+  searchProducts(@Param('name') name: string) {
+    return this.productsService.searchProductsByName(name);
   }
 
   @Get('categories')
