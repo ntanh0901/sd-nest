@@ -14,5 +14,6 @@ import { Sku, SkuSchema } from './schemas/sku.schema';
   ],
   controllers: [ProductsController],
   providers: [ProductsService],
+  exports: [ProductsService, MongooseModule],
 })
 export class ProductsModule {}
