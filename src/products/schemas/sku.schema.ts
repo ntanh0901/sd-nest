@@ -19,6 +19,9 @@ export class Sku {
 
   @Prop({ required: true })
   quantity: number;
+
+  @Prop({ required: false, default: 0 })
+  imageUrls: string[];
 }
 
 export const SkuSchema = SchemaFactory.createForClass(Sku);

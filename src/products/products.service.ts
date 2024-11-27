@@ -7,6 +7,8 @@ import { Product, ProductDocument } from './schemas/products.schema';
 import { Sku, SkuDocument } from './schemas/sku.schema';
 import { CreateSkuDto } from './dto/create-sku.dto';
 import { updateSkuDto } from './dto/update-sku.dto';
+import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
+import { create } from 'domain';
 
 @Injectable()
 export class ProductsService {
@@ -14,6 +16,7 @@ export class ProductsService {
     @InjectModel(Product.name)
     private readonly productModel: Model<ProductDocument>,
     @InjectModel(Sku.name) private readonly skuModel: Model<SkuDocument>,
+    private readonly cloudinaryService: CloudinaryService,
   ) {}
 
   async createProduct(createProductDto: CreateProductDto) {
@@ -38,19 +41,11 @@ export class ProductsService {
   }
 
   async createSku(createSkuDto: CreateSkuDto) {
-    if (createSkuDto.sku) {
-      const existingSku = await this.skuModel.findOne({
-        sku: createSkuDto.sku,
-      });
-
-      if (existingSku) {
-        throw new ConflictException('This sku is already exists');
-      }
-    } else {
+    if (!createSkuDto.sku) {
       createSkuDto.sku = this.generateFormattedSku(createSkuDto);
     }
 
-    //check if sku has all attributes of the product
+    // Check if sku has all attributes of the product
     const existingProduct = await this.productModel.findOne({
       spu: createSkuDto.spu,
     });
@@ -67,8 +62,23 @@ export class ProductsService {
       }
     }
 
+    let imageUrls: string[];
+    const imageExists = await this.checkIfImagesExist(createSkuDto.sku);
+
+    if (!imageExists) {
+      imageUrls = await Promise.all(
+        createSkuDto.imagePath.map(async (path) => {
+          const url = await this.cloudinaryService.uploadImage(path);
+          return url;
+        }),
+      );
+    } else {
+      imageUrls = imageExists.imageUrls;
+    }
+
     const newSku = new this.skuModel({
       ...createSkuDto,
+      imageUrls,
     });
 
     await newSku.save();
@@ -100,6 +110,20 @@ export class ProductsService {
       sku += createSkuDto.attributes[key];
     }
     return sku;
+  }
+
+  async checkIfImagesExist(sku: string): Promise<SkuDocument | null> {
+    // Split the SKU into spu and the rest of the key
+    const [spu, key] = sku.split('-');
+
+    // Create a regular expression to match any SKU that starts with spu and the key
+    const regex = new RegExp(`^${spu}-${key}`);
+
+    // Query the database to find a matching SKU
+    const existingSku = await this.skuModel.findOne({ sku: { $regex: regex } });
+
+    // Return the existing SKU if found, null otherwise
+    return existingSku;
   }
 
   async findAllProducts() {
