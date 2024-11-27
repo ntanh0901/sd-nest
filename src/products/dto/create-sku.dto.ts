@@ -1,4 +1,10 @@
-import { IsString, IsNumber, IsOptional, IsObject } from 'class-validator';
+import {
+  IsString,
+  IsNumber,
+  IsOptional,
+  IsObject,
+  IsArray,
+} from 'class-validator';
 
 export class CreateSkuDto {
   @IsString()
@@ -16,4 +22,8 @@ export class CreateSkuDto {
 
   @IsNumber()
   quantity: number;
+
+  @IsArray()
+  @IsOptional()
+  imagePath: string[];
 }

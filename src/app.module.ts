@@ -7,6 +7,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { AppController } from './app.controller';
 import { PaymentModule } from './payment/payment.module';
 import { PassportModule } from '@nestjs/passport';
+import { CloudinaryModule } from './cloudinary/cloudinary.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { PassportModule } from '@nestjs/passport';
     ProductsModule,
     AuthModule,
     PaymentModule,
+    CloudinaryModule,
   ],
   controllers: [AppController],
   providers: [],
