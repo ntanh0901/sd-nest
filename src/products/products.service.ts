@@ -112,6 +112,33 @@ export class ProductsService {
     return sku;
   }
 
+  async getSkusWithColorAttribute(spu: string) {
+    const colorAttributeKey = 'color'; // Replace with the actual key for the color attribute
+
+    const skus = await this.skuModel.aggregate([
+      { $match: { spu } },
+      {
+        $group: {
+          _id: `$attributes.${colorAttributeKey}`,
+          sku: { $first: '$$ROOT' },
+        },
+      },
+      {
+        $replaceRoot: { newRoot: '$sku' },
+      },
+    ]);
+
+    return skus;
+  }
+
+  async getSimilarProducts(category: string, spu: string) {
+    const products = await this.productModel
+      .find({ categories: category, spu: { $ne: spu } })
+      .exec();
+
+    return products;
+  }
+
   async checkIfImagesExist(sku: string): Promise<SkuDocument | null> {
     // Split the SKU into spu and the rest of the key
     const [spu, key] = sku.split('-');
@@ -221,17 +248,22 @@ export class ProductsService {
     };
   }
 
-  async updateStockForPendingOrder(sku: string, quantity: number) {
-    const existingSku = await this.skuModel.findOne({ sku });
+  async updateStockForPendingOrder(skus: string[], quantity: number[]) {
+    for (let i = 0; i < skus.length; i++) {
+      const sku = await this.skuModel.findOne({ sku: skus[i] });
+      sku.quantity -= quantity[i];
+      await sku.save();
+      await this.updateStockForProduct(skus[i], -quantity[i]);
+    }
+  }
 
-    if (!existingSku) {
-      throw new ConflictException('This sku is not exists');
+  async findProductBySpu(spu: string) {
+    const product = await this.productModel.findOne({ spu }).exec();
+
+    if (!product) {
+      throw new ConflictException('This product is not exists');
     }
 
-    existingSku.quantity -= quantity;
-
-    await existingSku.save();
-
-    await this.updateStockForProduct(existingSku.spu, -quantity);
+    return product;
   }
 }

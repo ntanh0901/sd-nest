@@ -9,10 +9,10 @@ export class Payment {
   userId: string;
 
   @Prop({ required: true })
-  spu: string;
+  spu: string[];
 
   @Prop({ required: true })
-  sku: string;
+  sku: string[];
 
   @Prop({ required: true })
   amount: number;
@@ -20,16 +20,16 @@ export class Payment {
   @Prop({ required: true })
   totalPrice: number;
 
-  @Prop({ required: true })
+  @Prop({ required: true, default: 'pending' })
   status: string;
 
   @Prop({ required: true })
   paymentMethod: string;
 
-  @Prop({ required: true })
+  @Prop({ required: true, default: new Date() })
   createdAt: Date;
 
-  @Prop({ required: true })
+  @Prop({ required: true, default: new Date() })
   updatedAt: Date;
 }
 

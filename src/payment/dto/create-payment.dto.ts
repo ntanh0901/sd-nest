@@ -1,22 +1,29 @@
-import { IsString, IsNumber, IsDate, IsOptional } from 'class-validator';
+import {
+  IsString,
+  IsNumber,
+  IsDate,
+  IsOptional,
+  IsArray,
+} from 'class-validator';
 
 export class CreatePaymentDto {
   @IsString()
   userId: string;
 
-  @IsString()
-  spu: string;
+  @IsArray()
+  spu: string[];
 
-  @IsString()
-  sku: string;
+  @IsArray()
+  sku: string[];
 
-  @IsNumber()
-  amount: number;
+  @IsArray()
+  amount: number[];
 
   @IsOptional()
   @IsNumber()
   totalPrice: number;
 
+  @IsOptional()
   @IsString()
   status: string;
 
