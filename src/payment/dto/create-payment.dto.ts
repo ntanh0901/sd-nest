@@ -4,6 +4,7 @@ import {
   IsDate,
   IsOptional,
   IsArray,
+  IsObject,
 } from 'class-validator';
 
 export class CreatePaymentDto {
@@ -29,4 +30,7 @@ export class CreatePaymentDto {
 
   @IsString()
   paymentMethod: string;
+
+  @IsObject()
+  userInfo: Object;
 }

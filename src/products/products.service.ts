@@ -248,12 +248,18 @@ export class ProductsService {
     };
   }
 
-  async updateStockForPendingOrder(skus: string[], quantity: number[]) {
+  async updateStockForPendingOrder(
+    spus: string[],
+    skus: string[],
+    quantity: number[],
+  ) {
     for (let i = 0; i < skus.length; i++) {
       const sku = await this.skuModel.findOne({ sku: skus[i] });
       sku.quantity -= quantity[i];
       await sku.save();
-      await this.updateStockForProduct(skus[i], -quantity[i]);
+      const product = await this.productModel.findOne({ spu: spus[i] });
+      product.inStock -= quantity[i];
+      await product.save();
     }
   }
 

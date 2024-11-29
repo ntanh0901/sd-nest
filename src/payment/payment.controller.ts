@@ -56,8 +56,13 @@ export class PaymentController {
     return this.paymentService.createVNPayUrl(CreatePaymentDto, request);
   }
 
+  @Post('transaction')
+  createNormalPayment(@Body() createPaymentDto: CreatePaymentDto) {
+    return this.paymentService.addTransaction(createPaymentDto);
+  }
+
   @Get('vnpay-return')
   vnpayReturn(@Query() request, @Res() response) {
-    return this.paymentService.returnBill(request, response);
+    return this.paymentService.vnPayCallback(request, response);
   }
 }

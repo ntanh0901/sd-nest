@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, mongo } from 'mongoose';
+import { Document } from 'mongoose';
 
 export type PaymentDocument = Payment & Document;
 
@@ -15,7 +15,7 @@ export class Payment {
   sku: string[];
 
   @Prop({ required: true })
-  amount: number;
+  amount: number[];
 
   @Prop({ required: true })
   totalPrice: number;
@@ -25,6 +25,9 @@ export class Payment {
 
   @Prop({ required: true })
   paymentMethod: string;
+
+  @Prop({ required: true, type: Object })
+  userInfo: Record<string, any>;
 
   @Prop({ required: true, default: new Date() })
   createdAt: Date;

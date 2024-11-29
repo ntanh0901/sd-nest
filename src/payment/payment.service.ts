@@ -25,10 +25,11 @@ export class PaymentService {
 
     await newPayment.save();
 
-    // this.productsService.updateStockForPendingOrder(
-    //   createPaymentDto.sku,
-    //   createPaymentDto.amount,
-    // );
+    this.productsService.updateStockForPendingOrder(
+      createPaymentDto.spu,
+      createPaymentDto.sku,
+      createPaymentDto.amount,
+    );
 
     return {
       message: 'Payment created successfully',
@@ -91,6 +92,26 @@ export class PaymentService {
     };
   }
 
+  async addTransaction(createPaymentDto: CreatePaymentDto) {
+    const newPayment = new this.paymentModel({
+      ...createPaymentDto,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+
+    await newPayment.save();
+
+    await this.productsService.updateStockForPendingOrder(
+      createPaymentDto.spu,
+      createPaymentDto.sku,
+      createPaymentDto.amount,
+    );
+
+    return {
+      status: 'success',
+    };
+  }
+
   async createVNPayUrl(createPaymentDto: CreatePaymentDto, req: Request) {
     console.log(createPaymentDto);
     //get a sample ip address
@@ -140,7 +161,7 @@ export class PaymentService {
     vnpUrl += '?' + querystring.stringify(vnp_Params, { encode: false });
 
     //await this.create(createPaymentDto);
-    console.log(vnpUrl);
+    await this.addTransaction(createPaymentDto);
     return {
       url: vnpUrl,
     };
@@ -155,7 +176,7 @@ export class PaymentService {
     return sorted;
   }
 
-  async returnBill(query, response) {
+  async vnPayCallback(query, response) {
     let vnp_Params = query;
 
     let secureHash = vnp_Params['vnp_SecureHash'];
@@ -183,27 +204,29 @@ export class PaymentService {
       if (vnp_Params['vnp_ResponseCode'] === '00') {
         //Thanh toan thanh cong
         //update order status
-        // const payment = await this.paymentModel.findOne({ userId: id });
+        const payment = await this.paymentModel
+          .findOne({ userId: id })
+          .sort({ createdAt: -1 });
 
-        // payment.status = 'paid';
+        payment.status = 'paid';
 
-        // await payment.save();
+        await payment.save();
         response.redirect(
           'http://localhost:3000/checkout/result?status=success',
         );
       } else {
         //Thanh toan khong thanh cong
         //update order status
-        // const payment = await this.paymentModel.findOne({ userId: id });
+        const payment = await this.paymentModel.findOne({ userId: id });
 
-        // payment.status = 'failed';
+        payment.status = 'failed';
 
-        // await payment.save();
-        response.redirect('http://localhost:3000/checkout/failed');
+        await payment.save();
+        response.redirect('http://localhost:3000/checout/result?status=failed');
       }
       //res.render('success', {code: vnp_Params['vnp_ResponseCode']});
     } else {
-      console.log('error return bill');
+      console.log('error VNPay call back');
       //res.render('success', {code: '97'});
     }
   }
