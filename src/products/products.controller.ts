@@ -15,7 +15,6 @@ import { CreateSkuDto } from './dto/create-sku.dto';
 import { updateSkuDto } from './dto/update-sku.dto';
 import { AdminGuard } from 'src/guards/amin.guard';
 
-@UseGuards(AdminGuard)
 @Controller('products')
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
@@ -35,9 +34,27 @@ export class ProductsController {
     return this.productsService.findAllProducts();
   }
 
+  @Get('product/:spu')
+  getProduct(@Param('spu') spu: string) {
+    return this.productsService.findProductBySpu(spu);
+  }
+
   @Get('list-skus/:spu')
   listSkus(@Param('spu') spu: string) {
     return this.productsService.findAllSkusOfProduct(spu);
+  }
+
+  @Get('list-skus-by-color/:spu')
+  listSkusByColor(@Param('spu') spu: string) {
+    return this.productsService.getSkusWithColorAttribute(spu);
+  }
+
+  @Get('list-similar/:category/:spu')
+  listSimilarProducts(
+    @Param('category') category: string,
+    @Param('spu') spu: string,
+  ) {
+    return this.productsService.getSimilarProducts(category, spu);
   }
 
   @Get('search/:name')
